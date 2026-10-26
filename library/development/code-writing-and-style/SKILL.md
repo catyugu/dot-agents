@@ -17,10 +17,10 @@ Load this skill when:
 - You are about to add an abstraction, layer, or indirection and need the
   rules that say when it is not justified
 
-For per-language naming/formatting/style conventions (C++, Python, Rust, Go, Java,
-JS/TS, C#, C, Bash, Markdown), load the `language-style-guide` skill instead — this
-skill is about how to approach writing code, not how a given language likes to be
-formatted.
+For per-language naming/formatting/style conventions (C++, C, Python, Rust, Go,
+JS/TS, C#, Kotlin, PHP, Ruby, Bash, Markdown), load the `language-style-guide`
+skill instead — this skill is about how to approach writing code, not how a given
+language likes to be formatted.
 
 ---
 

@@ -13,7 +13,7 @@ Source: <https://google.github.io/styleguide/cppguide.html>
 
 ## 2 命名
 
-常量性项目名：文件/类型 → snake_case；变量/函数按命名空间以下表格。常用 Google 风格表：
+文件全部小写下划线（`my_class.cc`/`my_class.h`）；其余对象按下表：
 
 | 对象                                    | 规则                         | 示例                        |
 | --------------------------------------- | ---------------------------- | --------------------------- |
@@ -24,7 +24,7 @@ Source: <https://google.github.io/styleguide/cppguide.html>
 | 命名空间                                | 全小写，用分隔分组           | `my_namespace`, `absl`      |
 | 宏（尽量少用）                          | 全大写下划线                 | `MY_MACRO_H_`               |
 
-- 成员变量（Google 风格）保持小写下划线，不加下划线后缀（非 required）。
+- 成员变量同样小写下划线，不加 `_` 后缀（Chromium 等风格用尾下划线，不要混用）。
 
 ## 3 文件组织
 
@@ -58,7 +58,7 @@ Source: <https://google.github.io/styleguide/cppguide.html>
 ## 7 智能指针与 RAII
 
 - 所有权转移/独占用 `std::unique_ptr`；共享需明确 justify 才用 `std::shared_ptr`；坚决不用 `auto_ptr`。
-- 全局/静态对象禁用非平凡析构；`<stuff>` 用 constinit/constexpr。
+- 全局/静态对象避免非平凡析构与动态初始化；能 `constexpr`/`constinit` 的就别放到运行期。
 - 资源获取即初始化（RAII），文件/互斥/锁都用 guard 对象；不要手动 `new`/裸 `delete`。
 
 ## 8 错误与异常
@@ -92,4 +92,16 @@ static std::shared_ptr<Foo> g_foo = std::make_shared<Foo>();
 Foo make_foo() { return Foo{}; }
 ```
 
-> 本页给出可执行、可量化的规则；未注明的极端规则以官方 Google C++ Style 原文为准，冲突时仓库 .clang-format/cpplint 配置优先。
+## 11 评审清单
+
+- [ ] 头文件自包含、有包含保护、只放声明与 `inline`/模板
+- [ ] include 顺序正确，同名头在最前
+- [ ] 命名符合 §2 表格，文件用 snake_case
+- [ ] 声明即初始化，`nullptr` 替代 `NULL`/`0`，宽类型按需
+- [ ] 单参构造与转换运算符标 `explicit`，重写标 `override`，非基类标 `final`
+- [ ] 所有权用 `unique_ptr`，`shared_ptr` 有明确理由，无裸 `new`/`delete`
+- [ ] 错误用 `Status`/`optional`/错误码表达，未用异常做常规控制流
+- [ ] 二元运算符多为非成员，`operator==` 与 `<=>` 语义一致
+- [ ] `clang-format --dry-run`、`clang-tidy`/`cpplint`、构建与测试全绿（真实运行）
+
+> 冲突时裁决顺序：仓库 `.clang-format`/`.clang-tidy`/`cpplint` 配置 > 本文件 > Google C++ Style 原文。
