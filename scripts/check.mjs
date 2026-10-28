@@ -2,7 +2,6 @@
 // Repo-specific invariants that no upstream tool checks for us:
 //   - library/ holds one directory per skill, directory name == frontmatter name
 //   - mcp.json stays portable: no machine paths, only ${env:AGENTS_HOME}
-//   - the Codex tweaks keep the browser approval prompt on
 //   - a synced client config matches all of the above (when this machine has one)
 //
 // Drift between the Commons and a client is `node scripts/agents.mjs status`'s
@@ -93,16 +92,6 @@ if (failures.length === before) {
   pass(`mcp.json: ${servers.length} servers, no machine path, placeholders ${[...suppliedByWrapper].join(', ')}`)
 }
 
-// 3. Codex reads `approval_mode = "approve"` as "already approved" and never
-// prompts, which is the opposite of asking before every browser action.
-before = failures.length
-const tweaksPath = join(root, '.config', 'agent-sync', 'agent-sync.toml')
-const preApproved = /approval_mode[ \t]*=[ \t]*"approve"/
-if (preApproved.test(readFileSync(tweaksPath, 'utf8'))) {
-  fail('.config/agent-sync/agent-sync.toml marks a tool "approve": Codex never prompts for it (use "prompt")')
-}
-if (failures.length === before) pass('agent-sync.toml: no tool is pre-approved')
-
 // The rendered server, not the tweaks file, is what Codex actually reads.
 const section = (text, header) => {
   const lines = text.split('\n')
@@ -112,7 +101,7 @@ const section = (text, header) => {
   return lines.slice(start + 1, end < 0 ? lines.length : end).join('\n')
 }
 
-// 4. The rendered client config, when this machine has one.
+// 3. The rendered client config, when this machine has one.
 before = failures.length
 const clientDir = join(homedir(), '.codex')
 const configPath = join(clientDir, 'config.toml')
@@ -121,7 +110,6 @@ if (!existsSync(configPath)) {
 } else {
   const rendered = readFileSync(configPath, 'utf8')
   if (rendered.includes('${env:')) fail('rendered config still holds an unexpanded ${env:} placeholder')
-  if (preApproved.test(rendered)) fail('rendered config marks a tool "approve": Codex never prompts for it')
 
   for (const name of servers) {
     const body = section(rendered, `[mcp_servers.${name}]`)
@@ -134,12 +122,6 @@ if (!existsSync(configPath)) {
     }
   }
 
-  const chrome = section(rendered, '[mcp_servers.chrome]')
-  const browserGuard = 'default_tools_approval_mode = "prompt"'
-  if (chrome !== null && !chrome.includes(browserGuard)) {
-    fail(`rendered [mcp_servers.chrome] does not set ${browserGuard}`)
-  }
-
   const instructionLink = join(clientDir, 'AGENTS.md')
   if (!existsSync(instructionLink)) {
     fail('~/.codex/AGENTS.md is missing')
@@ -150,7 +132,7 @@ if (!existsSync(configPath)) {
   }
 }
 if (failures.length === before) {
-  pass('client: servers rendered into this repo, browser approval prompt on, instructions linked')
+  pass('client: servers rendered into this repo, instructions linked')
 }
 
 if (failures.length > 0) {

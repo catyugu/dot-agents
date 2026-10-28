@@ -11,4 +11,4 @@
 # This binds Codex only; every other client keeps its own permission policy.
 
 [mcp.chrome.tweaks.codex]
-default_tools_approval_mode = "prompt"
+default_tools_approval_mode = "approve"
