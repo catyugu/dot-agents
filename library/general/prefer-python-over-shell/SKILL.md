@@ -1,8 +1,7 @@
 ---
 name: prefer-python-over-shell
 description: Write a Python script instead of a native shell command whenever the job is more than one command with no data munging — quoting, globbing, text or CSV/JSON transforms, HTTP, in-place edits, parallel work, cross-platform paths, long Windows paths.
-category: general
-version: "1.0"
+version: "1.0.0"
 license: "MIT"
 ---
 
