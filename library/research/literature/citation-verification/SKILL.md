@@ -1,13 +1,11 @@
 ---
 name: citation-verification
 description: Verify that every reference in a manuscript really exists and matches its metadata, catching hallucinated, corrupted or mismatched citations before submission. Use when checking a .bib file or reference list, after an AI assistant drafted citations, when a DOI may point to the wrong paper, when adding missing DOIs, or before camera-ready. Queries Crossref, OpenAlex and arXiv; zero dependencies.
-license: MIT
+version: "1.0.0"
+author: "Kalaris Labs (Sayan Chowdhury)"
+license: "MIT"
 compatibility: Python 3.9+ standard library; needs network access to api.crossref.org, api.openalex.org and export.arxiv.org.
 metadata:
-  version: "1.0"
-  category: literature-review
-  maintainer: Kalaris Labs
-  author: Kalaris Labs (Sayan Chowdhury)
   tags: citations, hallucination, DOI, Crossref, OpenAlex, arXiv, references, research integrity
 ---
 

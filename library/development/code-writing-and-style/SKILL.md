@@ -1,8 +1,7 @@
 ---
 name: code-writing-and-style
 description: Karpathy coding principles — think before coding, simplicity, surgical changes, goal-driven execution.
-category: development
-version: "1.4"
+version: "1.4.0"
 author: "catyugu"
 license: "MIT"
 ---

@@ -1,9 +1,9 @@
 ---
 name: humanizer-zh
 description: Use when editing Chinese prose to strip template filler.
-version: 1.0.0
-author: 歸藏 (op7418); adapted from blader/humanizer v3.0.0 and Humanizer-zh PR 39
-license: MIT
+version: "1.0.0"
+author: "歸藏 (op7418); adapted from blader/humanizer v3.0.0 and Humanizer-zh PR 39"
+license: "MIT"
 ---
 
 # Humanizer-zh

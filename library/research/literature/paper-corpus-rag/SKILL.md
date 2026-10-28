@@ -1,13 +1,11 @@
 ---
 name: paper-corpus-rag
 description: Build grounded question answering and retrieval-augmented generation (RAG) over your own collection of research papers, with answers that cite the exact paper and passage. Use when a user wants to "chat with" or search a folder of PDFs, synthesize evidence across a literature corpus, find which paper says X, or build a vector/hybrid index with SQLite FTS5, pgvector (Postgres), Chroma, Qdrant or FAISS. Includes a zero-dependency local full-text index with citable hits.
-license: MIT
+version: "1.0.0"
+author: "Kalaris Labs (Sayan Chowdhury)"
+license: "MIT"
 compatibility: Python 3.9+ with SQLite FTS5 (standard in CPython builds). Optional pypdf, sentence-transformers, psycopg/pgvector, chromadb or qdrant-client for the vector tiers.
 metadata:
-  version: "1.0"
-  category: knowledge-and-rag
-  maintainer: Kalaris Labs
-  author: Kalaris Labs (Sayan Chowdhury)
   tags: RAG, retrieval, vector database, pgvector, Chroma, Qdrant, FAISS, SQLite, full-text search, literature synthesis
 ---
 

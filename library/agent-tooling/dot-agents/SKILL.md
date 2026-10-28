@@ -1,6 +1,9 @@
 ---
 name: dot-agents
 description: Maintain ~/.agents, the one Git-versioned copy of skills, MCP servers and shared instructions that agent-sync fans out to Codex, Claude Code, Gemini CLI and other clients. Use whenever the task touches that environment — writing or editing a skill there, adding or removing an MCP server, syncing changes to clients, explaining "everything is in sync" or a failed sync, or rebuilding the toolchain on a new machine — even when the user only names a skill or a server and never mentions the repo.
+version: "1.0.0"
+author: "catyugu"
+license: "MIT"
 ---
 
 # dot-agents

@@ -1,13 +1,13 @@
 ---
 name: literature-review
 description: Conducts systematic, scoping, and narrative literature reviews using PubMed, arXiv, bioRxiv, Semantic Scholar, and other appropriate sources. Use for research synthesis, reproducible literature searches, screening, citation checking, or preparing Markdown and PDF reviews. Tracks search coverage, records versus studies, and evidence limitations; supports meta-analysis planning but does not supply a meta-analysis engine.
-allowed-tools: Read Write Edit Bash
-license: MIT license
+version: "1.11.0"
+author: "K-Dense Inc."
+license: "MIT"
 compatibility: Python 3.10+ with requests; network for DOI checks and searches. Optional parallel-cli requires Parallel authentication. PDF export needs Pandoc and XeLaTeX; AI schematics need OPENROUTER_API_KEY.
+allowed-tools: Read Write Edit Bash
 metadata:
-  version: "1.11"
   last-reviewed: "2026-09-30"
-  skill-author: K-Dense Inc.
   openclaw:
     primaryEnv: OPENROUTER_API_KEY
     envVars:

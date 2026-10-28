@@ -1,9 +1,9 @@
 ---
 name: autocomsol
 description: Design, write, and validate new COMSOL Multiphysics Java models intended for comsolcompile and comsolbatch. Use when creating or modifying a COMSOL Java simulation, selecting COMSOL physics APIs (electric currents, electrostatics, heat transfer, solid mechanics, electric-thermal-structural couplings, frequency-domain electromagnetic waves), geometry entities, materials, studies, multiphysics couplings, exports, or numerical acceptance checks. Consult the bundled locally validated Java cases and evidence documents before using nontrivial COMSOL APIs.
-version: 0.1.0
-author: catyugu
-license: MIT
+version: "0.1.0"
+author: "catyugu"
+license: "MIT"
 ---
 
 # AutoCOMSOL

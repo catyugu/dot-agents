@@ -1,8 +1,8 @@
 ---
 name: project-bootstrap
 description: Bootstrap project from a just-runnable program to a project with sound foundations.
-category: development
 version: "1.0.0"
+author: "catyugu"
 license: "MIT"
 ---
 

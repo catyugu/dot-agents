@@ -1,6 +1,9 @@
 ---
 name: skill-creator
 description: Write new skills and rewrite existing ones so they trigger at the right moment and stay cheap to load. Use whenever the user wants a skill created, a checklist or workflow turned into one, an existing skill's description or structure improved, or a skill that never fires debugged — even if they never say the word "skill".
+version: "1.0.0"
+author: "catyugu"
+license: "MIT"
 ---
 
 # Skill Creator

@@ -1,7 +1,7 @@
 ---
 name: language-style-guide
 description: Apply the official style and engineering conventions of a language when writing or reviewing code — per-language numbered references covering formatting, naming, file/module layout, types, API design, error handling, concurrency, docs, tooling, examples, and a review checklist, for C, C++, Python, Rust, Go, JavaScript/TypeScript, C#, Kotlin, PHP, Ruby, Bash, and Markdown.
-version: "1.2"
+version: "1.2.0"
 author: "catyugu"
 license: "MIT"
 ---

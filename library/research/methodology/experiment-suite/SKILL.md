@@ -1,6 +1,9 @@
 ---
 name: experiment-suite
 description: Use when the user has a research question and needs a complete experiment package — design document, runnable code, results (measured or simulated with honest provenance), publication-grade figures, structured report. Single-stage, no Python runtime.
+version: "1.0.0"
+author: "catyugu"
+license: "MIT"
 ---
 
 # Experiment Suite
