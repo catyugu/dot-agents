@@ -1,6 +1,6 @@
 ---
 name: project-bootstrap
-description: Turn a just-runnable program into a project with frozen foundations — pin the environment manager and build system, settle assertions, logging, error handling, public exports and distribution, then agree on the core data structures with the user before writing features. Use when starting a repository from scratch, when a prototype or single file starts to grow, when asked to "set up the project" or decide the layout and tooling, or when a new project needs its first honest design pass. Not for adding features to a project that already has these foundations.
+description: Bootstrap project from a just-runnable program to a project with sound foundations.
 category: development
 version: "1.0"
 license: "MIT"
@@ -8,24 +8,29 @@ license: "MIT"
 
 # Project bootstrap
 
-Bootstrap is a freeze, not a build-out. Each item gets decided once, written down, and left alone until a real need moves it. The order matters: every step constrains the next, and the last one constrains everything that follows.
+Bootstrap a project that may evolve and scale. Start from a prototype, then fix down the core and foundation, make it consistent in style, easy to maintain and reproduce.
 
-## Gate: something already runs
+## When to use the skill
 
-Start once there is a runnable program — one file, one command, visible output. Layout decided before a program runs is guesswork, and the first real program falsifies most of it. If nothing runs yet, write the smallest thing that does, then come back.
+- When you are starting any project.
+- When you are turning a prototype into a real project.
 
-## 1. Pin the environment manager
+## 1. Build casually for that runs
+
+Start once there is a runnable program — one or few files, commands, with analyzable or visible output. Layout decided before a program runs is guesswork, and the first real program falsifies most of it. If nothing runs yet, write the smallest thing that does.
+
+## 2. Pin the environment/toolchain manager
 
 One per language, declared in the repo, with a committed lockfile. The test: a fresh clone plus one command produces the same interpreter and dependency set.
 
-| Language | Manager | Declared in | One-command install |
+| Language | Manager | Declared in |
 | --- | --- | --- | --- |
-| Python | uv | `pyproject.toml`, `.python-version`, `uv.lock` | `uv sync --locked` |
-| Node | pnpm | `package.json` (`engines.node`), `pnpm-lock.yaml` | `pnpm install --frozen-lockfile` |
-| Rust | cargo | `rust-toolchain.toml`, `Cargo.lock` | `cargo fetch` |
-| C, C++ | CMake presets + pinned compiler | `CMakePresets.json`, `CMakeLists.txt` | `cmake --preset <name>` |
-| Go | go toolchain | `go.mod` (`go` directive) | `go mod download` |
-| JVM | gradle wrapper | `gradlew`, `.gradle/` files committed | `./gradlew build` |
+| Python | uv | `pyproject.toml`, `.python-version`, `uv.lock` |
+| Node | pnpm | `package.json` (`engines.node`), lock file for package manager |
+| Rust | cargo | `rust-toolchain.toml`, `Cargo.lock` |
+| C, C++ | cmake |  `CMakeLists.txt`  |
+| Go | go toolchain | `go.mod` (`go` directive) |
+| JVM | gradle wrapper | `gradlew`, `.gradle/` file |
 
 Rules that keep it pinned:
 
@@ -33,31 +38,33 @@ Rules that keep it pinned:
 - The runtime version lives in the repo file, not in a README sentence.
 - Build tooling (formatter, linter, test runner) is a declared dependency too, invoked through the same manager.
 
-## 2. Freeze the build loop
+## 2. Freeze the working loop
 
-Five names, one command each, implemented in one place (Makefile, justfile, package scripts, a `tasks.py`) and stated in the README:
+in `README.md` and `AGENTS.md`, fix down how to do the following:
 
-| Command | Meaning |
+| Stage | Meaning |
 | --- | --- |
-| `setup` | install dependencies into the project environment |
-| `build` | produce the artifact, or say "nothing to build" for interpreted projects |
+| `setup` | configure, install dependencies into the project environment |
+| `build` | produce the artifact, or no-op for interpreted projects |
 | `test` | every check a change must pass |
-| `run` | the program, on the sample input |
+| `run` | the program or examples that we produce shall actually work |
 | `lint` | formatter check plus static analysis |
-
-Every later instruction can then say "run `test`" and mean it; CI copies the same command. If no test exists yet, `test` runs the smoke check that proves the program runs.
-
-Do not add CI, coverage gates, docs sites or release automation now. They encode a workflow that does not exist yet.
 
 ## 3. Foundational components
 
-Decide these in order and record the decision somewhere durable (a README section or `docs/design.md`). Each is cheap now and expensive once code depends on it.
+Decide these in order and record the decision somewhere durable (`docs/design.md` or `docs/design/*.md` for larger projects).
+
+### Types
+
+- Usually for languages like C/C++/rust where you may have to decide what data types to use in different cases.
+- What types to use for table index or handler? What types to use for flags? What types to use for Real number?
+- Use aliased and consistent data types makes the type system more flexible and maintainable, also it reduces unnecessary type conversions.
 
 ### Assertions
 
 - Separate programmer error from user input: internal invariants fail loudly, external data returns an error. Never assert on input that comes from outside the program.
 - One assertion per real invariant — sizes agree, ordering holds, a resource is owned exactly once — not one per statement.
-- C and C++: `assert` vanishes in release builds. If the invariant must hold in production, use a check that aborts with a message and stays enabled.
+- C and C++: `assert` vanishes in release builds. If the invariant must hold in production, use a check that aborts with a message and stays enabled. However you may still use macros to bring up the standard assertion functionalities into better semantics.
 - A failing assertion means the code is wrong, not the data. It is not a validation layer.
 
 ### Logging
@@ -78,13 +85,18 @@ Decide these in order and record the decision somewhere durable (a README sectio
 ### Public surface (only for a library or reusable module)
 
 - Say explicitly what is public: `__all__`, `pub` versus private modules, a header listing exported names, `pub(crate)` where it applies.
+- For C/C++: consider using some conventional macros to export things so that it can be built on different platforms and toolchains. 
 - Everything else is private by default. Every exported name is a promise that owes a docstring and a test.
 - No compat aliases or re-export shims. Rename outright and fix the callers.
 - Scattered exports are not an API. One entry module that re-exports the intended surface, or none.
 
-### Integration and distribution (only when something consumes it)
+### Integration and distribution(optional)
 
-- Decide how it is installed and run *before* writing packaging: console entry point, container image, single binary, or "run it from the checkout".
+- For projects with remote and potential colaboration, you MUST add CI.
+- Decide if it will be installed or deployed as a service, if YES, you shall add CD.
+
+If you really need CD:
+
 - Distribution reuses the same lockfile; do not grow a second dependency story for packaging.
 - Stop there. No installer, no release matrix, no auto-versioning until another person needs the artifact.
 
@@ -104,20 +116,16 @@ Present it as a table and ask one concrete question per row, not "what do you th
 | Is the identifier ours or the world's? | ours: opaque, never parsed back into meaning |
 | Does this need to be general? | minimum now; extension later is a field with a default or a variant |
 
-Extensibility, concretely — and nothing more:
+Don't write:
 
 - a new field with a default value;
 - a closed variant or enum when the alternatives are already known;
 - a new function or table row when behaviour differs by configuration.
 
-Refuse now: base classes with one subclass, registries, factories, plugin hooks, generic parameters for a single concrete use, config files before a second config value exists.
-
-When a decision is hard to reverse — on-disk format, public API, identity — say so and ask for confirmation rather than inferring it. Record the outcome and its reason in the design note; a later reader needs the constraint, not the deliberation.
+Refuse for now: base classes with only one subclass, factories, plugin hooks, config files before a second config value exists.
 
 ## Done looks like
 
-- fresh clone, `setup`, `test`, `run` works with no undocumented global state;
-- README states the five commands, the runtime version, and the error and exit-code contract;
 - one place configures logging and no library prints;
 - the public surface is explicit and small, internals are private by default;
 - core data structures are plain data types with visible invariants, and the design note says why;
