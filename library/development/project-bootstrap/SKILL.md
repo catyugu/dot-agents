@@ -32,11 +32,7 @@ One per language, declared in the repo, with a committed lockfile. The test: a f
 | Go | go toolchain | `go.mod` (`go` directive) |
 | JVM | gradle wrapper | `gradlew`, `.gradle/` file |
 
-Rules that keep it pinned:
-
-- Never a global install to make the project work: no `pip install`, `npm i -g`, unversioned `npx` / `uvx`. Whatever the build needs gets declared and run through the project environment.
-- The runtime version lives in the repo file, not in a README sentence.
-- Build tooling (formatter, linter, test runner) is a declared dependency too, invoked through the same manager.
+**NEVER a global install to make the project work**: no `pip install`, `npm i -g`, unversioned `npx` / `uvx`. Whatever the build needs gets declared and run through the project environment.
 
 ## 2. Freeze the working loop
 
