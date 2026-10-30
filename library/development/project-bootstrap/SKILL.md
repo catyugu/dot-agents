@@ -92,6 +92,27 @@ Decide these in order and record the decision somewhere durable (`docs/design.md
 - Decide the test granularity. Usually we only need a few end-to-end tests for one module. Never try to unit-test every single function/branch/boundary-case.
 - Coverage is usually not required, and shall not be some standard or requirement of the project.
 
+
+### Determine the types and data-structures
+
+Types and data structures decides the project's shape and is the step that is strongly related to the code quality. For every major decision that may affect the architecture, put it in front of the user.
+
+You may decide: 
+
+- what it is; 
+- what are the minimal necessary constraints for the type;
+- should I make it generic or fixed 
+- what are the potential fields for the data structure;
+- invariants (what should always be true, what is never allowed); 
+- identity and lifetime (is it only a data view, what makes two instances equal, who owns it, what may mutate, who can modify it, who may read it);
+
+Don't write:
+
+- a closed variant or enum when the alternatives are already known;
+- a new function or table row when behaviour differs by configuration.
+
+Refuse for now: base classes with only one subclass, factories, plugin hooks.
+
 ### Integration and distribution(optional)
 
 - For projects with remote and potential colaboration, you MUST add CI.
@@ -102,35 +123,11 @@ If you really need CD:
 - Distribution reuses the same lockfile; do not grow a second dependency story for packaging.
 - Stop there. No installer, no release matrix, no auto-versioning until another person needs the artifact.
 
-## 4. The data-structure conversation
-
-This decides the project's shape and is the one step never done alone. Draft it, put it in front of the user, get a verdict on each item, then write the result down.
-
-Draft the minimum core — typically three to seven entities. For each: name and one sentence of what it is; fields with types and units; invariants (what is always true, what is never allowed); identity and lifetime (what makes two instances equal, who owns it, what may mutate); serialization, if any (field names become API when the format is public).
-
-Present it as a table and ask one concrete question per row, not "what do you think":
-
-| Question | What the answer decides |
-| --- | --- |
-| Are A and B one entity or two? | split them if they change independently; merge if they always change together |
-| Is that field optional, or is there a second variant? | optional fields on one type are the most common design debt |
-| Who mutates this after construction? | nobody means immutable; many means one owner and one write path |
-| Is the identifier ours or the world's? | ours: opaque, never parsed back into meaning |
-| Does this need to be general? | minimum now; extension later is a field with a default or a variant |
-
-Don't write:
-
-- a new field with a default value;
-- a closed variant or enum when the alternatives are already known;
-- a new function or table row when behaviour differs by configuration.
-
-Refuse for now: base classes with only one subclass, factories, plugin hooks, config files before a second config value exists.
-
 ## Done looks like
 
 - one place configures logging and no library prints;
 - the public surface is explicit and small, internals are private by default;
-- core data structures are plain data types with visible invariants, and the design note says why;
-- nothing exists without a current caller: no plugin system, no config layer, no compat shim.
+- core data structures are plain data types with visible invariants;
+- nothing exists without a current caller or explicit user demand: no plugin system, no config layer, no compat shim.
 
 Features go on top from here. The foundations stay frozen until one of them fails in practice — then reopen that single decision, not the whole stack.
