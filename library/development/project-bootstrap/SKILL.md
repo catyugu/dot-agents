@@ -86,6 +86,12 @@ Decide these in order and record the decision somewhere durable (`docs/design.md
 - No compat aliases or re-export shims. Rename outright and fix the callers.
 - Scattered exports are not an API. One entry module that re-exports the intended surface, or none.
 
+### How to test
+
+- Decide the utilities and styles we use for testing.
+- Decide the test granularity. Usually we only need a few end-to-end tests for one module. Never try to unit-test every single function/branch/boundary-case.
+- Coverage is usually not required, and shall not be some standard or requirement of the project.
+
 ### Integration and distribution(optional)
 
 - For projects with remote and potential colaboration, you MUST add CI.
