@@ -15,6 +15,10 @@ Bootstrap a project that may evolve and scale. Start from a prototype, then fix 
 - When you are starting any project.
 - When you are turning a prototype into a real project.
 
+## Principles
+
+- ASK USER IF YOU'RE HESITATING. Don't make major decisions by yourself.
+
 ## 1. Build casually for that runs
 
 Start once there is a runnable program — one or few files, commands, with analyzable or visible output. Layout decided before a program runs is guesswork, and the first real program falsifies most of it. If nothing runs yet, write the smallest thing that does.
@@ -23,7 +27,7 @@ Start once there is a runnable program — one or few files, commands, with anal
 
 One per language, declared in the repo, with a committed lockfile. The test: a fresh clone plus one command produces the same interpreter and dependency set.
 
-| Language | Manager | Declared in |
+| Language | Example manager | Declared in |
 | --- | --- | --- | --- |
 | Python | uv | `pyproject.toml`, `.python-version`, `uv.lock` |
 | Node | pnpm | `package.json` (`engines.node`), lock file for package manager |
@@ -116,12 +120,15 @@ Refuse for now: base classes with only one subclass, factories, plugin hooks.
 ### Integration and distribution(optional)
 
 - For projects with remote and potential colaboration, you MUST add CI.
+- Consider what platforms and consumers we are targeting.
+- CI shall be minimum and maintainable.
+- Specifically for C/C++ library projects: make sure that your library target can be properly installed and packed and consumed.
 - Decide if it will be installed or deployed as a service, if YES, you shall add CD.
 
 If you really need CD:
 
+- Pin down: What should be distributed? Some automated update (e.g. for a worker on Cloudflare, or a package on npmjs), source code only, or some precompiled executable or lib or wheel? What platforms are targeted? 
 - Distribution reuses the same lockfile; do not grow a second dependency story for packaging.
-- Stop there. No installer, no release matrix, no auto-versioning until another person needs the artifact.
 
 ## Done looks like
 
