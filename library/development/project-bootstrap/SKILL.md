@@ -28,11 +28,11 @@ Start once there is a runnable program — one or few files, commands, with anal
 One per language, declared in the repo, with a committed lockfile. The test: a fresh clone plus one command produces the same interpreter and dependency set.
 
 | Language | Example manager | Declared in |
-| --- | --- | --- | --- |
+| --- | --- | --- |
 | Python | uv | `pyproject.toml`, `.python-version`, `uv.lock` |
 | Node | pnpm | `package.json` (`engines.node`), lock file for package manager |
 | Rust | cargo | `rust-toolchain.toml`, `Cargo.lock` |
-| C, C++ | cmake |  `CMakeLists.txt`  |
+| C, C++ | cmake | `CMakeLists.txt` |
 | Go | go toolchain | `go.mod` (`go` directive) |
 | JVM | gradle wrapper | `gradlew`, `.gradle/` file |
 
@@ -99,7 +99,7 @@ Decide these in order and record the decision somewhere durable (`docs/design.md
 
 ### Determine the types and data-structures
 
-Types and data structures decides the project's shape and is the step that is strongly related to the code quality. For every major decision that may affect the architecture, put it in front of the user.
+Types and data structures decide the project's shape, and this step is strongly related to code quality. For every major decision that may affect the architecture, put it in front of the user.
 
 You may decide: 
 
