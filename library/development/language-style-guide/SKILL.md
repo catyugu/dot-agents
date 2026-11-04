@@ -57,4 +57,4 @@ license: "MIT"
 
 ## 行为原则
 
-加载 `code-writing-and-style` 获取更高层的 Karpathy 风格原则：先思考、保持简单、外科手术式变更、目标驱动。
+这个文档只描述了具体的语言风格，你应该在写代码前另外加载 `software-engineering` 来获取更宏观的工程习惯。
