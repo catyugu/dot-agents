@@ -1,6 +1,6 @@
 ---
 name: teach
-description: Teach the user a new skill or concept, within this workspace.
+description: Teach concepts and skills, explain technical reasoning, or plan and continue a persistent course. Use for direct learning questions as well as multi-session teaching.
 version: "1.1.0"
 author: "catyugu"
 license: "MIT"
@@ -8,115 +8,49 @@ disable-model-invocation: true
 argument-hint: "What would you like to learn about?"
 ---
 
-The user has asked you to teach them something. This is a stateful request - they intend to learn the topic over multiple sessions.
+Answer the learner's current question using their stated background, preferences, and requested depth. Teach in the conversation by default. Build a persistent course or learning artifact when requested; use existing course context when continuing one.
 
-## Teaching Workspace
+## Teaching Quality
 
-Treat the current directory as a teaching workspace. The state of the user's learning lives there across sessions, and how it is laid out is your call. Four kinds of state matter:
+Develop each explanation as a coherent unit of understanding. Let conceptual dependencies and the depth needed to answer the question determine its length. Split at meaningful boundaries, keeping the reasoning that connects central concepts intact.
 
-- The **mission**: the _reason_ the user is interested in the topic. It grounds all teaching. Use the format in [MISSION-FORMAT.md](./MISSION-FORMAT.md).
-- **Resources**: what you draw knowledge and wisdom from. Use the format in [RESOURCES-FORMAT.md](./RESOURCES-FORMAT.md).
-- **Learning records**: what the user has actually learned, used to calculate the zone of proximal development. Use the format in [LEARNING-RECORD-FORMAT.md](./LEARNING-RECORD-FORMAT.md).
-- **Lessons, reference documents and notes**: the HTML the user reads, plus a scratchpad for user preferences and your own working notes.
+Prefer connected prose. Use headings, lists, equations, and diagrams where they clarify the subject. Choose examples, analogies, exercises, and summaries for a concrete teaching purpose rather than a fixed lesson template.
 
-Name them and place them in whatever way keeps later sessions able to find them.
+State the assumptions needed for important claims and show how the conclusions follow from definitions, derivations, observations, or evidence. For a mechanism, explain the intermediate steps that produce the outcome. For a mathematical result, give the proof or identify the result being used and check its assumptions; identify any proof deferred to a later lesson.
 
-## Philosophy
+Distinguish established results from intuition, analogy, interpretation, and speculation. Explain how an example illustrates the principle. Keep an analogy's correspondence and limits clear where they affect the conclusion.
 
-To learn at a deep level, the user needs three things:
+Before delivering, check the reasoning internally: does each important inference have support, do successive paragraphs advance the same explanation, and are notation and assumptions consistent? Repair missing steps rather than covering them with rhetorical transitions. Keep this review out of the learner-facing text.
 
-- **Knowledge**, captured from high-quality, high-trust resources
-- **Skills**, acquired through highly-relevant interactive lessons devised by you, based on the knowledge
-- **Wisdom**, which comes from interacting with other learners and practitioners
+## Adapt to the Learner
 
-Before the resource list is well-populated, your focus should be to find high-quality resources which will help the user acquire knowledge. Never trust your parametric knowledge.
+Use what the learner has stated or demonstrated to choose a starting point. Explain missing prerequisites where they become necessary, and avoid repeating material already established. Treat learning records as evidence about prior understanding, not a precise calculation of current ability.
 
-Some topics may require more skills than knowledge. Learning more about theoretical physics might be more knowledge-based. For yoga, more skills-based.
+Ask a clarifying question when its answer would materially change the explanation or course plan. A request to understand a theory is a sufficient learning goal. When the learner asks a specific question, answer it without requiring a mission interview.
 
-### Fluency vs Storage Strength
+For an ongoing course, use its goals and the learner's latest request to choose the next topic. Update the plan when the learner changes direction; resolve a consequential ambiguity before rewriting their goals.
 
-You should be careful to split between two types of learning:
+Use retrieval practice, spacing, and varied applications when they help retention or transfer. Offer practice that tests a specific understanding and respects constraints such as "no coding exercises." Provide complete explanations and worked examples when requested.
 
-- **Fluency strength**: in-the-moment retrieval of knowledge
-- **Storage strength**: long-term retention of knowledge
+## Sources
 
-Fluency can give the user an illusory sense of mastery, but storage strength is the real goal. Try to design lessons which build long-term retention by desirable difficulty:
+Use reliable sources to establish external facts, check uncertain claims, and resolve disagreements. Prefer sources appropriate to the subject, such as textbooks, primary research, official documentation, or relevant practitioner accounts. Identify experience-based advice as such.
 
-- Using retrieval practice (recall from memory)
-- Spacing (distributing practice over time)
-- Interleaving (mixing up different but related topics in practice - for skills practice only)
+Cite sources where they directly support a claim or offer useful further study. Verify the reasoning in a technical explanation itself: a citation or an illustrative example does not fill a missing proof. Recommend further reading when it helps the learner's next step.
 
-## Lessons
+## Persistent Courses and Materials
 
-A lesson is the main thing you produce — the unit in which knowledge and skills reach the user. Each lesson is one self-contained HTML file, saved under a name that makes its place in the course clear.
+When maintaining a course, read relevant existing goals, learning records, and preferences before extending it. Create or update state only when it will affect future teaching; a standalone question needs no course setup.
 
-A lesson should be **beautiful** — clean, readable typography and layout — since the user will return to these later to review. Think Tufte.
+Keep state easy to find and use these formats as needed:
 
-The lesson should be short, and completable very quickly. Learners' working memory is very small, and we need to stay within it. But each lesson should give the user a single tangible win that they can build on. It should be directly tied to the mission, and should be in the user's zone of proximal development.
+- [MISSION-FORMAT.md](./MISSION-FORMAT.md): record course goals, scope, and constraints when planning or revising a course.
+- [LEARNING-RECORD-FORMAT.md](./LEARNING-RECORD-FORMAT.md): record demonstrated understanding, stated prior knowledge, or a confirmed correction that changes future teaching.
+- [RESOURCES-FORMAT.md](./RESOURCES-FORMAT.md): curate sources likely to be used again.
+- [GLOSSARY-FORMAT.md](./GLOSSARY-FORMAT.md): define recurring terms and notation when a shared reference helps.
 
-If possible, open the lesson file for the user by running a CLI command.
+Record stated teaching preferences where future sessions can find them. Separate evidence of learning from material merely presented.
 
-Each lesson should link via HTML anchors to other lessons and reference documents.
+Use the requested format for saved materials. For an HTML course, keep typography readable, navigation clear, and equations accessible. Reuse existing assets where useful; extract shared components when actual reuse warrants it. Add interactive elements only when they help explain or explore the subject.
 
-Each lesson should recommend a primary source for the user to read or watch. This should be the most high-quality, high-trust resource you found on the topic.
-
-## Assets
-
-Lessons are built from reusable **components**: stylesheets, quiz widgets, simulators, diagram helpers — anything a second lesson could reuse.
-
-Reuse is the default, not the exception. Before authoring a lesson, look at the components already in the workspace and build from them. When a lesson needs something new and reusable, write it as a component and link to it — never inline code a future lesson would duplicate.
-
-A shared stylesheet is the first component every workspace earns: every lesson links it, so the lessons look like one consistent course rather than a pile of one-offs. As the workspace grows, so should the component library.
-
-## The Mission
-
-Every lesson should be tied into the mission - the reason that the user is interested in learning about the topic.
-
-If the user is unclear about the mission, or none is recorded yet, your first job should be to question the user on why they want to learn this.
-
-Failing to understand the mission will mean knowledge acquisition is not grounded in real-world goals. Lessons will feel too abstract. You will have no way of judging what the user should do next.
-
-Missions may change as the user develops more skills and knowledge. This is normal - make sure to update the mission and add a learning record to capture the change. Confirm with the user before changing the mission.
-
-## Zone Of Proximal Development
-
-Each lesson, the user should always feel as if they are being challenged 'just enough'.
-
-The user may specify an exact thing they want to learn. If they don't, figure out their zone of proximal development by:
-
-- Reading their learning records
-- Figuring out the right thing to teach them based on their mission
-- Teach the most relevant thing that fits in their zone of proximal development
-
-## Knowledge
-
-
-Knowledge should first be gathered from trusted resources. Keep track of them in the resource list. Lessons should be littered with citations - links to external resources to back up any claim made. This increases the trustworthiness of the lesson.
-
-## Skills
-
-If knowledge is all about acquisition, skills are about durability and flexibility. Make the knowledge stick.
-
-For skill acquisition, difficulty is the tool. Effortful retrieval is what builds storage strength. Skills should be taught through interactive lessons. You may guide the user through a few steps to take. 
-
-Let the user do or think about something instead of giving too detailed routines. For example, it is NOT recommended to just dump the full code for user to copy. At least leave some space for creativity and personal effort, so that the user can actually LEARN.
-
-## Reference Documents
-
-While creating lessons, you should also create reference documents. Lessons can reference these documents - they are useful for tracking raw units of knowledge useful across lessons.
-
-Lessons will rarely be revisited later - reference documents will be. They should be the compressed essence of the lesson, in a format designed for quick reference.
-
-Some learning topics lend themselves to reference:
-
-- Syntax and code snippets for programming
-- Algorithms and flowcharts for processes
-- Yoga poses and sequences for yoga
-- Exercises and routines for fitness
-- Glossaries for any topic with its own nomenclature
-
-Glossaries, in particular, are an essential reference. Once one is created, it should be adhered to in every lesson.
-
-## Notes
-
-The user will sometimes express preferences of how they want to be taught, or things you should keep in mind. This is the place to record those preferences, so you can refer back to them when designing lessons or working with the user.
+Create reference documents when they support later lookup, such as a notation guide, algorithm reference, or syntax sheet. Link related saved materials where it helps navigation. Preserve enough context for each explanation to remain understandable when revisited.
