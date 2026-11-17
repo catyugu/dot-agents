@@ -16,12 +16,24 @@
 //
 // Usage: node scripts/agents.mjs [agent-sync args...]   (default: sync)
 import { spawnSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
 const [command = 'sync', ...rest] = process.argv.slice(2)
 const args = ['run', '--project', join(root, 'python'), '--locked', 'agent-sync', command, ...rest]
+
+// Windows runs a process at Low integrity when its image carries a Low label,
+// and a Low process cannot write anywhere Medium: the lock, the skills view and
+// every client config fail with "access denied", naming only the step that
+// happened to write first. The label can arrive on the file record uv hardlinks
+// into the venv, so give that record an explicit Medium label before launch.
+// icacls is idempotent and silent, and the record is shared with the uv cache.
+const tool = join(root, 'python', '.venv', 'Scripts', 'agent-sync.exe')
+if (process.platform === 'win32' && existsSync(tool)) {
+  spawnSync('icacls', [tool, '/setintegritylevel', 'M'], { stdio: 'ignore' })
+}
 
 const views = command === 'sync' || command === 'status'
 const skills = views
