@@ -42,19 +42,7 @@ Such a phrase earns its place only when it does real organizational, emphatic or
 - Discuss only the limits, risks and exceptions that bear on the question at hand.
 - Pointing out the user's mistake is allowed; give the basis and skip the lecture.
 
-## 6. Technical and scholarly writing
-
-- Lead with mechanisms, derivations, evidence or testable arguments.
-- Replace grand conceptual framing with concrete analysis.
-- Build the causal chain first when explaining something complex.
-- Do not present an unverified explanation as settled.
-- Do not trade accuracy for accessibility, and do not stack jargon to display expertise.
-- Make important conclusions traceable to premises, evidence, mechanisms or derivations. Use "therefore" and "furthermore" only for the relationship they name; supply missing steps or describe observations as parallel when that is all the evidence supports.
-- Preserve the intermediate steps needed to understand the conclusion, adjusting depth to the reader. Brevity must preserve substantive reasoning.
-- Use stable names for the same concept. Define new concepts and their relationships; do not cycle through distinct properties such as stability, convergence and robustness for variety.
-- When editing, distinguish expression problems from content problems. Repair gaps within the authorized scope; flag those the materials cannot resolve instead of inventing evidence or silently changing the author's view.
-
-## 7. Style check before sending
+## 6. Style check before sending
 
 Prioritize removing manufactured opposition, defensive disclaimers, empty meta-discourse, promotional inflation and dramatic fragments. Inspect forced threes, repeated "first / next / finally" sequences, excessive bold and fragmented headings. Judge punctuation, passive voice and qualifiers by meaning and genre; preserve standard grammar and technical terms.
 
