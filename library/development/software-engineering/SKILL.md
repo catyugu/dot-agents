@@ -1,111 +1,100 @@
 ---
 name: software-engineering
-description: Software engineering habits that decide whether a change holds up — system-level thinking, naming and code style, module boundaries, data-oriented design, logging and error handling, comments and docs, tests, refactoring, and build/dependency/distribution discipline. Load it when writing or reviewing code in any language, planning or carrying out a refactor, deciding whether to add an abstraction or a dependency, setting logging and error-handling policy, or shaping build, CI and packaging for a project.
-version: "2.0.0"
-author: "catyugu"
-license: "MIT"
+description: Build and maintain software with sound engineering foundations, from a first runnable prototype through reproducible toolchains, types and invariants, public APIs, tests, refactoring, CI, and distribution. Use when starting or formalizing a project, writing or reviewing code in any language, choosing data structures or abstractions, defining logging and error handling, refactoring, or shaping build and release workflows.
+license: MIT
+metadata:
+  version: "2.1.0"
+  author: "catyugu"
 ---
 
 # Software Engineering
 
-## 1. Basic Principles
+## 1. Operating Principles
 
-- Software engineering is systems engineering; code is only one part of it.
-- Aim for simple, clear, efficient, and reliable systems. Once functionality and correctness requirements are met, reduce the amount of code, documentation, build, integration, and distribution system as much as possible, along with abstraction levels, runtime overhead, and maintenance burden.
-- Design only for confirmed requirements. Do not build mechanisms in advance for imagined use cases, possible future features, or boundary cases that do not yet exist.
-- Avoid meaningless abstraction. Abstraction usually means coupling. Introduce an abstraction only when it genuinely expresses clear semantics or significantly reduces complexity.
+- Treat software engineering as systems engineering; code is only one part of the system.
+- Meet the actual functionality and correctness requirements, then minimize code, documentation, abstraction layers, dependencies, build and distribution machinery, runtime overhead, and maintenance cost.
+- Design only for confirmed requirements. Do not add mechanisms for hypothetical features, extension points, or boundary cases that do not exist.
+- Introduce an abstraction only when it expresses a real semantic distinction or significantly reduces complexity. Abstraction also creates coupling.
+- Ask the user before committing to a consequential or uncertain architectural decision; present concrete alternatives and trade-offs instead of guessing.
+- **Start with something that runs.** For a new project, produce the smallest runnable program with observable or analyzable output before deciding the long-term layout. Once the prototype works, establish the foundations below and keep them stable until an actual problem justifies reopening a specific decision.
 
-## 2. Writing Code
+## 2. Establish the Project Foundations
 
-### Style and Naming
+### Reproducible Environment and Working Loop
 
-- Keep naming style consistent and follow the conventions of the language and its ecosystem used by the project.
-- Names, interfaces, and control flow should be as self-explanatory as possible rather than relying on comments and documentation.
-- Avoid anything that seriously harms readability, such as overly compressed expressions, complex nested conditions, and multi-level nested function calls.
-- Prefer verbose but easy to understand and test code over clever, terse, hard-to-read code.
+- Select one standard toolchain/dependency manager per language. Declare versions and dependencies in the repository, commit the relevant lockfile, and make a fresh clone reproducible with one documented setup command. Document compiler and platform prerequisites explicitly where a package manager cannot pin them.
+- Follow the language ecosystem rather than inventing a new manager: Python (`uv`, `pyproject.toml`, `.python-version`, `uv.lock`); Node (`pnpm`, `package.json`, `engines.node`, lockfile); Rust (`cargo`, `rust-toolchain.toml`, `Cargo.lock`); C/C++ (`CMakeLists.txt` and declared compiler/toolchain requirements); Go (`go.mod` and its toolchain directive); JVM (Gradle wrapper).
+- Never require ad-hoc global package installs (`pip install`, `npm install -g`, unversioned `npx` or `uvx`) to make a project work. Run project dependencies through its declared environment. Use standard build and packaging tools rather than reimplementing them.
+- Document the working loop in `README.md` and `AGENTS.md`, using native tool commands or a small common entry point. Each operation must actually work:
+  - `setup`: configure and install the declared dependencies into the project environment.
+  - `build`: produce the artifact, or explicitly do nothing for an interpreted project.
+  - `test`: run the checks required for a change.
+  - `run`: execute the program or a real example successfully.
+  - `lint`: check formatting and static-analysis rules.
+- Record durable foundational decisions, not meeting notes or speculation, in `docs/design.md` or focused files under `docs/design/` when the project warrants them.
 
-### Modules and Overall Design
+### Types, Data Structures, and Invariants
 
-- Each module should have a clear, stable responsibility; avoid several modules overlapping on the same work.
-- Module dependencies should be as unidirectional, clear, and traceable as possible; avoid circular dependencies. A reasonable amount of code duplication is acceptable when it avoids unnecessary cross-module coupling and indirection.
-- A module should have a clear, distinct function; avoid intermediate modules that only forward or aggregate.
-- Modules should always depend on data structures and structural interoperation between each other, never on each other's concrete implementation.
-- Inside a module, trust the input data (usually only the necessary assertions at the start of a function; avoid check branches). At interfaces and on the user side, stay wary of input data.
+- Choose consistent representations for indices, handles, flags, real numbers, and other recurring concepts. Use meaningful aliases when they express a real contract and prevent needless conversions.
+- For each consequential data structure, decide its purpose, minimal constraints, fields, generic versus fixed design, invariants, identity, ownership, lifetime, mutability, and read/write permissions. Put major choices before the user rather than silently locking in an architecture.
+- Prefer plain data for data containers. Give member functions only to types with genuine semantic operations, such as sparse matrices or quaternions.
+- Do not invent closed variants/enums to restate already-known alternatives without useful type semantics, or add configuration-driven behavior branches where a direct operation suffices. Avoid base classes with one subclass, speculative factories, plugin hooks, and multiple inheritance; favor simple data and composition.
+- **Use assertions for programmer errors, not for external input validation.** Assert actual internal invariants (shape agreement, ordering, ownership, etc.); turn bad external inputs into explicit errors. Do not scatter defensive checks across trusted internal code.
+- In C/C++, remember that `assert` may disappear in release builds. Use an always-enabled failing check for an invariant that must be enforced in production. A failed assertion means the implementation is wrong, not that validation succeeded.
 
-### Data and Operations
+### Logging and Error Handling
 
-- Think in terms of data-oriented programming: pure data containers generally should not provide any member functions; only containers that need specific semantics (sparse matrices, quaternions, and the like) should provide limited, essential member functions.
-- Always avoid multiple inheritance; what multiple inheritance can accomplish can usually be accomplished with composition.
-- A function should avoid too many parameters. With more than four parameters, check whether it has too many responsibilities, whether related parameters can be grouped, and whether dependencies can be bound in advance. Do not treat parameter count as a hard limit, though. Several independent, clearly meaningful parameters are usually better than a configuration object that lacks real semantics.
+- Configure logging once at the application entry point; use consistent levels and formats. INFO is a reasonable default, with DEBUG for detailed diagnosis. Send diagnostics to `stderr` and program data to `stdout`.
+- Libraries must not configure global logging or print diagnostics; they emit log records and let the application choose the sink. Log boundary events with useful context (path, identifier, duration, outcome), not every internal step. Avoid non-DEBUG logging in hot loops. Use JSON lines for machine consumers and readable text for people.
+- Define a consistent error contract: what returns an error, what throws or propagates, which invariants abort, and what exit codes mean. Expected failures (bad input, missing file, unavailable network) return explicit errors or typed exceptions handled at an appropriate boundary. Unexpected failures propagate with diagnostic context.
+- Catch only failures that can be handled, deliberately retried, or converted at the boundary, normally an I/O or application boundary. Never silently swallow an error or catch everything without a defined policy. Produce one actionable message where the error becomes actionable; do not repeatedly wrap or log the same failure.
+- Use exit code `0` for success and documented, distinct nonzero codes for meaningful failure classes where the program is a CLI. Centralize defaults and fallbacks; use them only when required by the contract, not to mask invalid internal state.
 
-### Logging, Exceptions, and Unexpected Behavior
+### Public API (Libraries and Reusable Modules)
 
-- Always manage default and fallback values in one place; never scatter them. Unless you are at the IO layer, do not fall back without a clear reason or business requirement; invalid data should go straight down the exception path.
-- A program should generally have logs. Logs should always be consistent and leveled; the default level is usually INFO, and DEBUG-level logs are usually only needed while debugging. Avoid overusing logs: apart from DEBUG-level entries, no log should be emitted inside a hot loop.
-- Establish one error-handling style inside the program. Avoid try-catch outside the IO layer unless there is a compelling reason for it. A try-catch deep in the system can hide real errors and lead to performance fluctuations and testing difficulties.
+- Explicitly designate the small supported public surface (`__all__`, `pub`, exported headers, or a single entry module as appropriate). Everything else is private by default. Avoid scattered re-exports, compatibility aliases, and forwarding shims.
+- For C/C++ libraries, make cross-platform export/visibility declarations explicit where shared-library builds need them.
+- Every public name is a maintained contract: document its semantics and test its observable behavior. Keep third-party implementation details out of public interfaces unless they are intentionally part of the contract.
+
+### Tests and Verification
+
+- Choose a testing utility, conventions, and granularity appropriate to the project. Favor a few high-value end-to-end or module-level tests covering real usage, core invariants, important interface contracts, and meaningful error paths.
+- Add a regression test for a defect when feasible. Do not unit-test every function, branch, or hypothetical boundary case merely to increase test counts; coverage percentages are not a requirement or success criterion.
+- Keep tests simpler than the software they exercise. Verify actual behavior rather than internal implementation details. Run the documented build, test, run, and lint operations before claiming success.
+
+## 3. Writing and Organizing Code
+
+### Style, Naming, and Modules
+
+- Follow the project's established conventions and the language ecosystem. Prefer clear names, straightforward control flow, and readable expressions over clever compression and deeply nested conditions.
+- Give each module one distinct responsibility. Keep dependencies unidirectional, clear, and traceable; avoid cycles, duplicate responsibility, and layers that only forward or aggregate.
+- Couple modules through documented data contracts and interfaces rather than another module's implementation details. Accept a little local duplication when it avoids unnecessary cross-module coupling.
+- Avoid adding defensive checks inside trusted modules beyond the assertions needed for real invariants; validate external data at boundaries.
+- If a function needs many parameters, check whether it has too many responsibilities or whether some inputs form a meaningful group. Do not impose an arbitrary argument count or introduce an empty configuration object just to shorten a signature.
 
 ### Comments and Documentation
 
-- Do not overuse comments. Naming, interface design, and code style should be as self-explanatory as possible without them. Always, and only, comment where it is necessary:
-    - There are implicit data contracts, preconditions, or side effects.
-    - The function and parameter names do not convey the meaning on their own. (For example, which unit do quantities carry?)
-    - The data layout has a specific contract. (For example, what each dimension of a multidimensional array means, what each offset level of a flattened one-dimensional array means, or what each bit in a network or hardware control protocol means.)
-    - The business logic is not obvious from the code itself (for example, an uncommon formula or a bit-twiddling trick is used).
-- Avoid long comments that explain implementation details. Such comments go stale as soon as the implementation changes.
-- A README should help users understand the project quickly, install it, and get started; it should not become a collection of every internal detail.
-- Separate user-facing usage instructions from maintainer-facing design notes.
-- Where possible, generate detailed documentation from code and comments with automated tools instead of maintaining large amounts of interface documentation by hand.
-- Keep documentation concise, accurate, and up to date. Stale content can be deleted outright; no historical migration record is needed for every internal refactor. Avoid maintaining process documents, checklists, and auxiliary tools that serve no real purpose.
+- Make names, interfaces, and structure explain the ordinary code. Comment only the non-obvious contracts, units, layouts, invariants, side effects, unusual formulas, and decisions that matter to maintainers.
+- Avoid narrating implementation line by line. Comments that duplicate code become stale; update or delete outdated documentation with the code it describes.
+- Keep `README.md` focused on purpose, setup, use, and the working loop. Separate user-facing usage from maintainer design notes; generate detailed API reference from code when practical.
+- Do not maintain checklists, process documents, or auxiliary tools without a demonstrated purpose. Public API documentation is an exception to the general preference for fewer comments: every exported contract needs explanation.
 
-### Testing and Verification
+## 4. Refactoring
 
-- Tests should verify actual behavior, invariants, interface contracts, and critical boundary and error paths; avoid over-testing internal implementation details.
-- Prefer tests that cover real usage over large numbers of low-value boilerplate tests written for coverage.
-- When fixing a defect, add a regression test that reliably reproduces the problem wherever possible.
-- Test code should follow the same principles of simplicity and maintainability. Avoid building test frameworks whose complexity exceeds that of the application or library itself.
+- Refactor with a concrete goal: simplify logic, remove duplication, clarify responsibilities, improve an interface or performance, or fix a defect. First understand the call graph, data contracts, and actual consumers.
+- Prefer subtraction: delete, merge, inline, move, or unify before introducing an abstraction. Remove dead helpers, duplicated defaults and checks, unnecessary wrappers and conversions, unused caches, speculative generalizations, old implementations, and obsolete configuration paths.
+- Preserve the required external behavior, but change internal structure decisively when a local patch would perpetuate a poor design. Do not expand the public surface, dependencies, or configuration without a requirement.
+- Preserve performance, readability, and testability rather than optimizing solely for line count. Change or delete tests that depended on discarded internals; do not preserve unreasonable production interfaces just to keep those tests passing.
+- Remove stale comments, documentation, and supporting code along with the obsolete implementation. Do not leave compatibility shims for callers you can update directly.
 
-## 3. How to Refactor
+## 5. Integration and Distribution
 
-### Refactoring Principles
+- Keep platform-independent build logic unified; localize unavoidable platform differences. State which platforms, toolchains, and feature combinations the project supports. Do not make downstream consumers install unnecessary tools or carry incidental dependencies.
+- **Add CI when a project is remote and may involve collaboration.** Keep it minimal and maintainable: automate the essential builds, tests, and lint checks, while retaining a useful local verification loop. Do not delegate every check to CI.
+- For installable C/C++ libraries, implement and verify installation, packaging, exported targets, and consumption from a separate project using the installed artifact rather than the source tree.
+- Decide whether the project is shipped as source, a package, an executable/library, or a deployed service, and which targets it supports. If the project will be installed or deployed as a service, add the corresponding CD workflow; otherwise do not invent release machinery.
+- Distribution must reuse the declared toolchain and dependency versions instead of maintaining a second, conflicting dependency story. Use established ecosystem packaging tools, and verify the artifact from an external consumer's perspective.
 
-- Refactoring should have a clear goal, such as reducing complexity, eliminating duplication, clarifying responsibilities, improving interfaces, improving performance, or fixing a real defect.
-- Before changing anything, understand the existing code's call relationships, data contracts, and actual uses, so that a local change does not create duplicated logic or confused responsibilities in other modules.
-- Prefer subtraction. Before introducing a new abstraction, check whether deleting, merging, inlining, moving, or unifying existing implementations solves the problem.
-- Refactoring should not expand the public interface, dependency scope, or user-visible configuration surface without reason.
-- While preserving the required functionality and behavior, change the internal structure boldly; do not patch locally and leave an unreasonable design in place.
-- Do not sacrifice performance, readability, or testability to shorten the code.
-- A refactor may rewrite or delete tests that depend on the old internal structure in the same change; do not keep an unreasonable production interface just so old tests keep passing.
+## Done Looks Like
 
-### Removing Redundancy
-
-- Remove duplicate checks for boundary cases that do not exist.
-- Remove extension points, configuration parameters, and generalization mechanisms built for requirements that do not yet exist.
-- Remove functions, classes, modules, caches, and helper scripts that have no actual consumers or have lost their purpose.
-- Remove old implementations that a new implementation replaced.
-- Eliminate duplicate data structures, type conversions, wrapper functions, and multiple implementations of the same logic.
-- Delete intermediate layers, aggregation layers, and pure forwarding interfaces with no clear purpose.
-- Clean up special branches, duplicated defaults, and scattered compatibility logic left behind by historical evolution.
-- Remove dead comments, outdated documentation, old implementations, and their now-invalid tests.
-
-## 4. Engineering and Distribution
-
-### Build and Dependencies
-
-- Prefer the mature, standard build and dependency management mechanisms of the language ecosystem; do not maintain by hand what a mature tool already does.
-- Dependencies should stay explicit, traceable, and version (range) determined. When introducing a dependency, weigh its build cost, transitive dependencies, and distribution cost.
-- Public interfaces should expose as little third-party implementation detail as possible, so an internal dependency does not accidentally become one users must carry.
-
-### Cross-Platform Applications
-
-- Unify build logic across platforms as far as possible. Introduce platform-specific handling only where real platform differences exist, and localize it.
-- Do not require users to install a pile of tools or libraries before they can build the project.
-- Do not significantly increase the build and installation burden on downstream users for the convenience of internal development.
-
-### Automated Integration and Deployment
-
-- Clearly separate the responsibilities of local development, automated testing, and formal release. Do not hand every verification to CI.
-- State which platforms, toolchains, and feature combinations CI/CD must cover.
-- Prefer existing build, test, packaging, and platform tools; do not reimplement what they already provide.
-- Manage dedicated scripts and configuration centrally; avoid scattering several overlapping automation directories around the repository.
-- Add build configuration, release artifacts, or automation stages only when the project genuinely needs them. Avoid building elaborate distribution infrastructure ahead of time.
-- For projects that involve building, installing, and distributing, verify that real external consumers can use the installed artifact.
+The project runs from a clean clone through a documented loop; core types and invariants are explicit; input validation, assertions, logging, and expected errors have distinct roles; the public API is small; meaningful tests pass; and CI, installation, and distribution exist only at the level the project's actual use requires. No unused extension point or compatibility layer survives without a real consumer.
