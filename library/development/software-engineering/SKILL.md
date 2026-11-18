@@ -1,6 +1,6 @@
 ---
 name: software-engineering
-description: Build and maintain software with sound engineering foundations, from a first runnable prototype through reproducible toolchains, types and invariants, public APIs, tests, refactoring, CI, and distribution. Use when starting or formalizing a project, writing or reviewing code in any language, choosing data structures or abstractions, defining logging and error handling, refactoring, or shaping build and release workflows.
+description: Guide software engineering decisions independently of programming language, from runnable prototypes and reproducible environments to data contracts, module boundaries, public APIs, tests, refactoring, CI, and distribution. Use when starting or formalizing a project, reviewing architecture or code organization, choosing abstractions and error policies, or planning build and release workflows. Leave language-specific conventions and tooling to the project and language-style-guide.
 license: MIT
 metadata:
   version: "2.1.0"
@@ -16,45 +16,46 @@ metadata:
 - Design only for confirmed requirements. Do not add mechanisms for hypothetical features, extension points, or boundary cases that do not exist.
 - Introduce an abstraction only when it expresses a real semantic distinction or significantly reduces complexity. Abstraction also creates coupling.
 - Ask the user before committing to a consequential or uncertain architectural decision; present concrete alternatives and trade-offs instead of guessing.
+- Keep this guidance technology-neutral. Follow the repository and `language-style-guide` for language idioms, syntax, formatting, and specific tool commands rather than prescribing them here.
 - **Start with something that runs.** For a new project, produce the smallest runnable program with observable or analyzable output before deciding the long-term layout. Once the prototype works, establish the foundations below and keep them stable until an actual problem justifies reopening a specific decision.
 
 ## 2. Establish the Project Foundations
 
 ### Reproducible Environment and Working Loop
 
-- Select one standard toolchain/dependency manager per language. Declare versions and dependencies in the repository, commit the relevant lockfile, and make a fresh clone reproducible with one documented setup command. Document compiler and platform prerequisites explicitly where a package manager cannot pin them.
-- Follow the language ecosystem rather than inventing a new manager: Python (`uv`, `pyproject.toml`, `.python-version`, `uv.lock`); Node (`pnpm`, `package.json`, `engines.node`, lockfile); Rust (`cargo`, `rust-toolchain.toml`, `Cargo.lock`); C/C++ (`CMakeLists.txt` and declared compiler/toolchain requirements); Go (`go.mod` and its toolchain directive); JVM (Gradle wrapper).
-- Never require ad-hoc global package installs (`pip install`, `npm install -g`, unversioned `npx` or `uvx`) to make a project work. Run project dependencies through its declared environment. Use standard build and packaging tools rather than reimplementing them.
-- Document the working loop in `README.md` and `AGENTS.md`, using native tool commands or a small common entry point. Each operation must actually work:
+- Choose a standard, maintainable toolchain and dependency-resolution approach for each part of the project. Declare dependencies and supported versions in the repository, commit lockfiles where supported, and make a fresh clone reproducible with one documented setup command. Record any prerequisites the project cannot pin.
+- Keep the repository as the source of truth for environment and dependency resolution; do not invent a parallel build or package-management mechanism.
+- Do not require undocumented global installations or ad-hoc environment state. Invoke tools through the declared project environment and use established build and packaging facilities.
+- Document the working loop in the repository's user and contributor instructions, using project-native commands or a small common entry point. Each operation must actually work:
   - `setup`: configure and install the declared dependencies into the project environment.
-  - `build`: produce the artifact, or explicitly do nothing for an interpreted project.
+  - `build`: produce the artifact, or be an explicitly documented no-op if no build is needed.
   - `test`: run the checks required for a change.
   - `run`: execute the program or a real example successfully.
   - `lint`: check formatting and static-analysis rules.
-- Record durable foundational decisions, not meeting notes or speculation, in `docs/design.md` or focused files under `docs/design/` when the project warrants them.
+- Record consequential foundational decisions and their rationale in a concise, durable design note when warranted; do not create speculative process documentation.
 
 ### Types, Data Structures, and Invariants
 
-- Choose consistent representations for indices, handles, flags, real numbers, and other recurring concepts. Use meaningful aliases when they express a real contract and prevent needless conversions.
-- For each consequential data structure, decide its purpose, minimal constraints, fields, generic versus fixed design, invariants, identity, ownership, lifetime, mutability, and read/write permissions. Put major choices before the user rather than silently locking in an architecture.
-- Prefer plain data for data containers. Give member functions only to types with genuine semantic operations, such as sparse matrices or quaternions.
-- Do not invent closed variants/enums to restate already-known alternatives without useful type semantics, or add configuration-driven behavior branches where a direct operation suffices. Avoid base classes with one subclass, speculative factories, plugin hooks, and multiple inheritance; favor simple data and composition.
-- **Use assertions for programmer errors, not for external input validation.** Assert actual internal invariants (shape agreement, ordering, ownership, etc.); turn bad external inputs into explicit errors. Do not scatter defensive checks across trusted internal code.
-- In C/C++, remember that `assert` may disappear in release builds. Use an always-enabled failing check for an invariant that must be enforced in production. A failed assertion means the implementation is wrong, not that validation succeeded.
+- Choose consistent representations for recurring concepts such as identifiers, units, states, and numerical precision. Make conversions and semantic distinctions explicit where they affect correctness.
+- For each consequential data structure or domain model, decide its meaning, minimal constraints, invariants, identity, ownership, lifetime, mutability, access rules, and whether generalization is actually needed. Put major choices before the user rather than silently locking in an architecture.
+- Keep simple data structures simple. Couple data and operations only where that relationship expresses essential domain semantics.
+- Avoid speculative classifications, hierarchy layers, factories, plugin hooks, and configuration branches without a current need. Prefer direct operations and composition when they reduce complexity.
+- **Use assertions for programmer errors, not for external input validation.** Check actual internal invariants; reject invalid external data with explicit, actionable errors at system boundaries. Do not scatter defensive checks across trusted internal code.
+- If an invariant is a production-safety requirement, enforce it with a check that remains enabled in production. An invariant failure indicates a defect; it is not a substitute for input validation.
 
 ### Logging and Error Handling
 
-- Configure logging once at the application entry point; use consistent levels and formats. INFO is a reasonable default, with DEBUG for detailed diagnosis. Send diagnostics to `stderr` and program data to `stdout`.
-- Libraries must not configure global logging or print diagnostics; they emit log records and let the application choose the sink. Log boundary events with useful context (path, identifier, duration, outcome), not every internal step. Avoid non-DEBUG logging in hot loops. Use JSON lines for machine consumers and readable text for people.
-- Define a consistent error contract: what returns an error, what throws or propagates, which invariants abort, and what exit codes mean. Expected failures (bad input, missing file, unavailable network) return explicit errors or typed exceptions handled at an appropriate boundary. Unexpected failures propagate with diagnostic context.
-- Catch only failures that can be handled, deliberately retried, or converted at the boundary, normally an I/O or application boundary. Never silently swallow an error or catch everything without a defined policy. Produce one actionable message where the error becomes actionable; do not repeatedly wrap or log the same failure.
-- Use exit code `0` for success and documented, distinct nonzero codes for meaningful failure classes where the program is a CLI. Centralize defaults and fallbacks; use them only when required by the contract, not to mask invalid internal state.
+- Configure logging once at the application boundary; choose levels, formats, and destinations for the project's actual operators and consumers. Keep diagnostics separate from program output where applicable.
+- Reusable components must not configure global logging or emit unsolicited output; let the application select sinks. Log significant boundary events with context and avoid commentary from hot loops. Prefer structured records for machine consumers and readable output for people.
+- Define a consistent error contract: distinguish expected operational failures from programmer defects; specify how failures propagate, when they terminate work, and how callers observe them. Turn expected failures into actionable results at an appropriate boundary, and preserve diagnostic context for unexpected failures.
+- Handle only failures that can be recovered, deliberately retried, or translated under a defined policy. Never suppress errors silently or report the same failure repeatedly; produce one actionable message where it can be used.
+- Document externally observable failure statuses and exit codes where applicable. Centralize defaults and fallbacks; use them only when required by the contract, not to mask invalid internal state.
 
 ### Public API (Libraries and Reusable Modules)
 
-- Explicitly designate the small supported public surface (`__all__`, `pub`, exported headers, or a single entry module as appropriate). Everything else is private by default. Avoid scattered re-exports, compatibility aliases, and forwarding shims.
-- For C/C++ libraries, make cross-platform export/visibility declarations explicit where shared-library builds need them.
-- Every public name is a maintained contract: document its semantics and test its observable behavior. Keep third-party implementation details out of public interfaces unless they are intentionally part of the contract.
+- Explicitly designate the smallest supported public interface. Treat everything else as internal by default; avoid accidental exports, compatibility aliases, and forwarding layers.
+- Keep public contracts independent of incidental implementation and deployment details unless those details are intentionally part of the contract.
+- Every public operation and data contract is a maintenance promise: document its semantics and test observable behavior. Avoid leaking third-party implementation details into the interface.
 
 ### Tests and Verification
 
@@ -66,7 +67,7 @@ metadata:
 
 ### Style, Naming, and Modules
 
-- Follow the project's established conventions and the language ecosystem. Prefer clear names, straightforward control flow, and readable expressions over clever compression and deeply nested conditions.
+- Follow the project's established naming and style conventions. Prefer clear names, straightforward control flow, and readable expressions over clever compression and deeply nested conditions; leave syntax and idioms to the relevant language guidance.
 - Give each module one distinct responsibility. Keep dependencies unidirectional, clear, and traceable; avoid cycles, duplicate responsibility, and layers that only forward or aggregate.
 - Couple modules through documented data contracts and interfaces rather than another module's implementation details. Accept a little local duplication when it avoids unnecessary cross-module coupling.
 - Avoid adding defensive checks inside trusted modules beyond the assertions needed for real invariants; validate external data at boundaries.
@@ -91,7 +92,7 @@ metadata:
 
 - Keep platform-independent build logic unified; localize unavoidable platform differences. State which platforms, toolchains, and feature combinations the project supports. Do not make downstream consumers install unnecessary tools or carry incidental dependencies.
 - **Add CI when a project is remote and may involve collaboration.** Keep it minimal and maintainable: automate the essential builds, tests, and lint checks, while retaining a useful local verification loop. Do not delegate every check to CI.
-- For installable C/C++ libraries, implement and verify installation, packaging, exported targets, and consumption from a separate project using the installed artifact rather than the source tree.
+- For installable libraries and reusable packages, verify installation, packaging, and consumption from an independent project using the installed artifact instead of the source tree.
 - Decide whether the project is shipped as source, a package, an executable/library, or a deployed service, and which targets it supports. If the project will be installed or deployed as a service, add the corresponding CD workflow; otherwise do not invent release machinery.
 - Distribution must reuse the declared toolchain and dependency versions instead of maintaining a second, conflicting dependency story. Use established ecosystem packaging tools, and verify the artifact from an external consumer's perspective.
 
